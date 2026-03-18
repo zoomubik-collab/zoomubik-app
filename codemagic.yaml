@@ -3,8 +3,10 @@ workflows:
     name: iOS Build
     instance_type: mac_mini_m1
     max_build_duration: 120
+
     environment:
       node: 22
+
     scripts:
       - name: Install dependencies
         script: npm install
@@ -17,12 +19,12 @@ workflows:
 
       - name: Build iOS
         script: |
+          cd ios/App
           xcodebuild \
-            -project ios/App.xcodeproj \
             -scheme App \
             -configuration Release \
-            -derivedDataPath ios/build \
-            -archivePath ios/build/App.xcarchive \
+            -derivedDataPath ../build \
+            -archivePath ../build/App.xcarchive \
             archive
 
     artifacts:
