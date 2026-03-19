@@ -1,13 +1,17 @@
 ﻿import { Component } from '@angular/core';
 import { CommonModule } from '@angular/common';
-import { IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonCard, IonCardContent, IonSpinner } from '@ionic/angular/standalone';
+import { IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonCard, IonCardContent, IonSpinner, IonCardHeader, IonCardTitle, IonItem, IonLabel, IonIcon, IonChip } from '@ionic/angular/standalone';
+import { addIcons } from 'ionicons';
+import { camera, image, shareSocial } from 'ionicons/icons';
 import { NativeService } from '../services/native.service';
+
+addIcons({ camera, image, shareSocial });
 
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
-  imports: [CommonModule, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonCard, IonCardContent, IonSpinner],
+  imports: [CommonModule, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonCard, IonCardContent, IonSpinner, IonCardHeader, IonCardTitle, IonItem, IonLabel, IonIcon, IonChip],
   providers: [NativeService]
 })
 export class HomePage {
