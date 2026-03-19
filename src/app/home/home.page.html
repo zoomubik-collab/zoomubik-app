@@ -1,7 +1,7 @@
-<ion-header [translucent]="true">
+﻿<ion-header [translucent]="true">
   <ion-toolbar>
     <ion-title>
-      Blank
+      Zoomubik - Características Nativas
     </ion-title>
   </ion-toolbar>
 </ion-header>
@@ -9,12 +9,46 @@
 <ion-content [fullscreen]="true">
   <ion-header collapse="condense">
     <ion-toolbar>
-      <ion-title size="large">Blank</ion-title>
+      <ion-title size="large">Características Nativas</ion-title>
     </ion-toolbar>
   </ion-header>
 
   <div id="container">
-    <strong>Ready to create an app?</strong>
-    <p>Start with Ionic <a target="_blank" rel="noopener noreferrer" href="https://ionicframework.com/docs/components">UI Components</a></p>
+    <ion-card>
+      <ion-card-content>
+        <h2>Compartir Anuncio</h2>
+        <ion-button expand="block" (click)="shareAnnouncement()" [disabled]="loading">
+          <span *ngIf="!loading">Compartir</span>
+          <ion-spinner *ngIf="loading" name="crescent"></ion-spinner>
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card>
+      <ion-card-content>
+        <h2>Cámara</h2>
+        <ion-button expand="block" (click)="capturePhoto()" [disabled]="loading">
+          <span *ngIf="!loading">Tomar Foto</span>
+          <ion-spinner *ngIf="loading" name="crescent"></ion-spinner>
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card>
+      <ion-card-content>
+        <h2>Galería</h2>
+        <ion-button expand="block" (click)="selectPhotoFromGallery()" [disabled]="loading">
+          <span *ngIf="!loading">Seleccionar Foto</span>
+          <ion-spinner *ngIf="loading" name="crescent"></ion-spinner>
+        </ion-button>
+      </ion-card-content>
+    </ion-card>
+
+    <ion-card *ngIf="selectedPhoto">
+      <ion-card-content>
+        <h2>Foto Seleccionada</h2>
+        <img [src]="selectedPhoto" alt="Foto seleccionada" style="max-width: 100%; height: auto;">
+      </ion-card-content>
+    </ion-card>
   </div>
 </ion-content>

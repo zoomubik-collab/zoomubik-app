@@ -1,12 +1,46 @@
-import { Component } from '@angular/core';
-import { IonHeader, IonToolbar, IonTitle, IonContent } from '@ionic/angular/standalone';
+﻿import { Component } from '@angular/core';
+import { CommonModule } from '@angular/common';
+import { IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonCard, IonCardContent, IonSpinner } from '@ionic/angular/standalone';
+import { NativeService } from '../services/native.service';
 
 @Component({
   selector: 'app-home',
   templateUrl: 'home.page.html',
   styleUrls: ['home.page.scss'],
-  imports: [IonHeader, IonToolbar, IonTitle, IonContent],
+  imports: [CommonModule, IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonCard, IonCardContent, IonSpinner],
+  providers: [NativeService]
 })
 export class HomePage {
-  constructor() {}
+  selectedPhoto: string | null = null;
+  loading = false;
+
+  constructor(private nativeService: NativeService) {}
+
+  async shareAnnouncement() {
+    this.loading = true;
+    await this.nativeService.shareContent(
+      'Mi Anuncio',
+      'Descripción del anuncio',
+      'https://zoomubik.com'
+    );
+    this.loading = false;
+  }
+
+  async capturePhoto() {
+    this.loading = true;
+    const photo = await this.nativeService.takePicture();
+    if (photo) {
+      this.selectedPhoto = photo;
+    }
+    this.loading = false;
+  }
+
+  async selectPhotoFromGallery() {
+    this.loading = true;
+    const photo = await this.nativeService.pickPhoto();
+    if (photo) {
+      this.selectedPhoto = photo;
+    }
+    this.loading = false;
+  }
 }
