@@ -31,7 +31,6 @@ workflows:
             -allowProvisioningUpdates \
             DEVELOPMENT_TEAM=6573BLNWHL \
             CODE_SIGN_IDENTITY="Apple Distribution" \
-            PROVISIONING_PROFILE_SPECIFIER="zoomubik-distribution-profile" \
             archive
 
       - name: Create ExportOptions.plist
