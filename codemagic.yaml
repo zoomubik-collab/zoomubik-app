@@ -36,7 +36,9 @@ workflows:
             -archivePath ../build/App.xcarchive \
             -derivedDataPath ../build \
             -allowProvisioningUpdates \
-            -genericDestination \
+            -authenticationKeyPath $AC_PRIVATE_KEY_PATH \
+            -authenticationKeyID $AC_PRIVATE_KEY_ID \
+            -authenticationKeyIssuerID $AC_PRIVATE_KEY_ISSUER_ID \
             DEVELOPMENT_TEAM=6573BLNWHL \
             CODE_SIGN_STYLE=Automatic \
             clean archive
