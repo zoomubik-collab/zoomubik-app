@@ -30,7 +30,6 @@ workflows:
             -archivePath ../build/App.xcarchive \
             -allowProvisioningUpdates \
             DEVELOPMENT_TEAM=6573BLNWHL \
-            CODE_SIGN_IDENTITY="Apple Distribution" \
             archive
 
       - name: Create ExportOptions.plist
