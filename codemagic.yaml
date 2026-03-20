@@ -52,7 +52,8 @@ workflows:
             --file ios/build/ipa/App.ipa \
             --type ios \
             --apiKey $APP_STORE_API_KEY \
-            --apiIssuer $APP_STORE_API_ISSUER
+            --apiIssuer $APP_STORE_API_ISSUER \
+            --apiKeyId $APP_STORE_KEY_ID
 
     artifacts:
       - ios/build/App.xcarchive
@@ -61,8 +62,6 @@ workflows:
     publishing:
       email:
         recipients:
-          - $DEVELOPER_EMAIL
-        notify:
-          success: true
-          failure: true
-
+          - danielpintal@gmail.com
+        success: true
+        failure: true
