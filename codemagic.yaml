@@ -63,5 +63,3 @@ workflows:
       email:
         recipients:
           - danielpintal@gmail.com
-        success: true
-        failure: true
