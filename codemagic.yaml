@@ -34,24 +34,22 @@ workflows:
 
       - name: Create ExportOptions.plist
         script: |
-          cat > ios/build/ExportOptions.plist << 'EOF'
-<?xml version="1.0" encoding="UTF-8"?>
-<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
-<plist version="1.0">
-<dict>
-	<key>method</key>
-	<string>app-store</string>
-	<key>signingStyle</key>
-	<string>automatic</string>
-	<key>stripSwiftSymbols</key>
-	<true/>
-	<key>teamID</key>
-	<string>6573BLNWHL</string>
-	<key>uploadBitcode</key>
-	<false/>
-</dict>
-</plist>
-EOF
+          printf '%s\n' '<?xml version="1.0" encoding="UTF-8"?>' \
+          '<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">' \
+          '<plist version="1.0">' \
+          '<dict>' \
+          '<key>method</key>' \
+          '<string>app-store</string>' \
+          '<key>signingStyle</key>' \
+          '<string>automatic</string>' \
+          '<key>stripSwiftSymbols</key>' \
+          '<true/>' \
+          '<key>teamID</key>' \
+          '<string>6573BLNWHL</string>' \
+          '<key>uploadBitcode</key>' \
+          '<false/>' \
+          '</dict>' \
+          '</plist>' > ios/build/ExportOptions.plist
 
       - name: Export IPA
         script: |
