@@ -30,7 +30,10 @@ workflows:
           mkdir -p ../build
           # Install provisioning profiles from Codemagic
           mkdir -p ~/Library/MobileDevice/Provisioning\ Profiles
-          find ~/.codemagic/provisioning_profiles -name "*.mobileprovision" -type f -exec cp {} ~/Library/MobileDevice/Provisioning\ Profiles/ \; 2>/dev/null || true
+          # Try multiple locations where Codemagic might store profiles
+          find ~ -name "*.mobileprovision" -type f 2>/dev/null | while read profile; do
+            cp "$profile" ~/Library/MobileDevice/Provisioning\ Profiles/ 2>/dev/null || true
+          done
           # List installed profiles for debugging
           ls -la ~/Library/MobileDevice/Provisioning\ Profiles/ || true
           xcodebuild \
