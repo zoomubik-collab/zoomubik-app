@@ -48,7 +48,21 @@ workflows:
       - name: Export IPA
         script: |
           cd ios/App
-          PROFILE_UUID=$(security cms -D -i ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision 2>/dev/null | grep -A1 'UUID' | grep string | head -1 | sed 's/.*<string>\(.*\)<\/string>/\1/' || true)
+
+          echo "=== Provisioning profiles encontrados ==="
+          ls ~/Library/MobileDevice/Provisioning\ Profiles/ 2>/dev/null || echo "Carpeta vacía"
+
+          PROFILE_PATH=$(ls ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision 2>/dev/null | head -1)
+          echo "Profile path: $PROFILE_PATH"
+
+          if [ -n "$PROFILE_PATH" ]; then
+            PROFILE_UUID=$(security cms -D -i "$PROFILE_PATH" | grep -A1 '<key>UUID</key>' | grep '<string>' | sed 's/.*<string>\(.*\)<\/string>.*/\1/')
+            echo "Profile UUID: $PROFILE_UUID"
+          else
+            echo "ERROR: No se encontró ningún perfil"
+            exit 1
+          fi
+
           cat > build/ExportOptions.plist <<EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
@@ -72,6 +86,10 @@ workflows:
           </dict>
           </plist>
           EOF
+
+          echo "=== ExportOptions.plist generado ==="
+          cat build/ExportOptions.plist
+
           xcodebuild \
             -exportArchive \
             -archivePath build/App.xcarchive \
