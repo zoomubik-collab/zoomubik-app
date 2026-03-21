@@ -12,7 +12,10 @@ workflows:
         CM_APPLE_DEV_TEAM_ID: "6573BLNWHL"
         CM_APPLE_API_KEY_ID: "467A28W6ZS"
         CM_APPLE_API_KEY_ISSUER_ID: "f6677e56-c6f1-4b84-af63-9e93f843034a"
-        CM_APPLE_API_KEY_PATH: "./AuthKey_467A28W6ZS.p8"
+        CM_APPLE_API_KEY: |-
+          -----BEGIN PRIVATE KEY-----
+          Pega_aquí_todo_el_contenido_de_tu_archivo_AuthKey_467A28W6ZS.p8
+          -----END PRIVATE KEY-----
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.zoomubik.app
@@ -82,7 +85,7 @@ workflows:
         api_key:
           key_id: $CM_APPLE_API_KEY_ID
           issuer_id: $CM_APPLE_API_KEY_ISSUER_ID
-          key_path: $CM_APPLE_API_KEY_PATH
+          key: $CM_APPLE_API_KEY
         submit_to_testflight: true
       email:
         recipients:
