@@ -12,6 +12,8 @@ workflows:
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.zoomubik.app
+        certificate: zoomubik-distribution
+        provisioning_profile: zoomubik-distribution-profile
     scripts:
       - name: Install dependencies
         script: npm ci
@@ -33,9 +35,10 @@ workflows:
             -destination 'generic/platform=iOS' \
             -sdk iphoneos \
             -archivePath build/App.xcarchive \
-            -allowProvisioningUpdates \
+            CODE_SIGN_STYLE="Manual" \
+            CODE_SIGNING_ALLOWED="YES" \
             DEVELOPMENT_TEAM="$CM_APPLE_DEV_TEAM_ID" \
-            CODE_SIGN_STYLE="Automatic" \
+            PROVISIONING_PROFILE_SPECIFIER="zoomubik-distribution-profile" \
             archive
 
       - name: Export IPA
@@ -49,9 +52,16 @@ workflows:
             <key>method</key>
             <string>app-store</string>
             <key>signingStyle</key>
-            <string>automatic</string>
+            <string>manual</string>
             <key>teamID</key>
             <string>$CM_APPLE_DEV_TEAM_ID</string>
+            <key>signingCertificate</key>
+            <string>zoomubik-distribution</string>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>com.zoomubik.app</key>
+              <string>zoomubik-distribution-profile</string>
+            </dict>
             <key>uploadBitcode</key>
             <false/>
             <key>uploadSymbols</key>
@@ -63,8 +73,7 @@ workflows:
             -exportArchive \
             -archivePath build/App.xcarchive \
             -exportOptionsPlist build/ExportOptions.plist \
-            -exportPath build/ipa \
-            -allowProvisioningUpdates
+            -exportPath build/ipa
 
     artifacts:
       - ios/App/build/App.xcarchive
