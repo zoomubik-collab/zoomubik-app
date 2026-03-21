@@ -10,15 +10,6 @@ workflows:
       cocoapods: default
       vars:
         CM_APPLE_DEV_TEAM_ID: "6573BLNWHL"
-        CM_APPLE_API_KEY_ID: "467A28W6ZS"
-        CM_APPLE_API_KEY_ISSUER_ID: "f6677e56-c6f1-4b84-af63-9e93f843034a"
-        CM_APPLE_API_KEY: |-
-          -----BEGIN PRIVATE KEY-----
-          MIGTAgEAMBMGByqGSM49AgEGCCqGSM49AwEHBHkwdwIBAQQgAC7E6pfvrnlwgV0k
-          fwj+RZAbhHonxJT4wjI1l0GjeaGgCgYIKoZIzj0DAQehRANCAAQPdk3UTXl9/JzC
-          0agxbVBDoxXTDUyhhvIaeHsqf8vxcUhkvuO36DFl9nB7RLEV3Jcc9DrMis8kxEVE
-          WvjpKpni
-          -----END PRIVATE KEY-----
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.zoomubik.app
@@ -86,9 +77,9 @@ workflows:
     publishing:
       app_store_connect:
         api_key:
-          key_id: $CM_APPLE_API_KEY_ID
-          issuer_id: $CM_APPLE_API_KEY_ISSUER_ID
-          key: $CM_APPLE_API_KEY
+          key_id: $APP_STORE_KEY_ID
+          issuer_id: $APP_STORE_ISSUER_ID
+          key: $APP_STORE_PRIVATE_KEY
         submit_to_testflight: true
       email:
         recipients:
