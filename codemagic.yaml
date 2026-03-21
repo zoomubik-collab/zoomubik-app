@@ -69,8 +69,4 @@ workflows:
 
     publishing:
       app_store_connect:
-        api_key:
-          key_id: $APP_STORE_KEY_ID
-          issuer_id: $APP_STORE_ISSUER_ID
-          key: $APP_STORE_PRIVATE_KEY
         submit_to_testflight: true
