@@ -16,20 +16,13 @@ workflows:
 
     scripts:
       - name: Install dependencies
-        script: npm install
+        script: npm ci
 
       - name: Build web
         script: npm run build
 
       - name: Sync Capacitor
         script: npx cap sync ios
-
-      - name: Clean iOS project
-        script: |
-          cd ios/App
-          xcodebuild -scheme App -configuration Release clean 2>/dev/null || true
-          rm -rf ../build
-          rm -rf ~/Library/Developer/Xcode/DerivedData
 
       - name: Build iOS Archive
         script: |
@@ -42,37 +35,37 @@ workflows:
             -destination 'generic/platform=iOS' \
             -sdk iphoneos \
             -archivePath ../build/App.xcarchive \
-            -derivedDataPath ../build \
             -allowProvisioningUpdates \
-            CODE_SIGN_STYLE=Automatic \
-            DEVELOPMENT_TEAM=$CM_APPLE_DEV_TEAM_ID \
+            DEVELOPMENT_TEAM="${CM_APPLE_DEV_TEAM_ID}" \
             archive
 
       - name: Export IPA
         script: |
           cd ios/App
+          cat > ../build/ExportOptions.plist <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>app-store</string>
+            <key>signingStyle</key>
+            <string>automatic</string>
+            <key>teamID</key>
+            <string>${CM_APPLE_DEV_TEAM_ID}</string>
+          </dict>
+          </plist>
+          EOF
+
           xcodebuild \
             -exportArchive \
             -archivePath ../build/App.xcarchive \
-            -exportOptionsPlist <(cat <<EOF
-          <?xml version="1.0" encoding="UTF-8"?>
-          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "[apple.com](http://www.apple.com/DTDs/PropertyList-1.0.dtd)">
-          <plist version="1.0">
-          <dict>
-              <key>method</key>
-              <string>app-store</string>
-              <key>signingStyle</key>
-              <string>automatic</string>
-              <key>teamID</key>
-              <string>$CM_APPLE_DEV_TEAM_ID</string>
-          </dict>
-          </plist>
-          EOF) \
+            -exportOptionsPlist ../build/ExportOptions.plist \
             -exportPath ../build/ipa
 
     artifacts:
-      - ios/build/App.xcarchive
-      - ios/build/ipa/App.ipa
+      - ios/App/build/App.xcarchive
+      - ios/App/build/ipa/*.ipa
 
     publishing:
       app_store_connect:
@@ -81,6 +74,3 @@ workflows:
           issuer_id: $APP_STORE_ISSUER_ID
           key: $APP_STORE_PRIVATE_KEY
         submit_to_testflight: true
-      email:
-        recipients:
-          - danielpintal@gmail.com
