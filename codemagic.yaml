@@ -42,6 +42,7 @@ workflows:
             -authenticationKeyPath "$CM_APPLE_API_KEY_PATH" \
             -authenticationKeyID "$CM_APPLE_API_KEY_ID" \
             -authenticationKeyIssuerID "$CM_APPLE_API_KEY_ISSUER_ID" \
+            -allowProvisioningUpdates \
             DEVELOPMENT_TEAM=6573BLNWHL \
             CODE_SIGN_STYLE=Automatic \
             archive
