@@ -8,6 +8,11 @@ workflows:
       node: 22
       xcode: latest
       cocoapods: default
+      vars:
+        CM_APPLE_DEV_TEAM_ID: "6573BLNWHL"
+        CM_APPLE_API_KEY_ID: "467A28W6ZS"
+        CM_APPLE_API_KEY_ISSUER_ID: "f6677e56-c6f1-4b84-af63-9e93f843034a"
+        CM_APPLE_API_KEY_PATH: "./AuthKey_467A28W6ZS.p8"
       ios_signing:
         distribution_type: app_store
         bundle_identifier: com.zoomubik.app
@@ -43,7 +48,7 @@ workflows:
             -derivedDataPath ../build \
             -allowProvisioningUpdates \
             CODE_SIGN_STYLE=Automatic \
-            DEVELOPMENT_TEAM=6573BLNWHL \
+            DEVELOPMENT_TEAM=$CM_APPLE_DEV_TEAM_ID \
             archive
 
       - name: Export IPA
@@ -62,26 +67,23 @@ workflows:
               <key>signingStyle</key>
               <string>automatic</string>
               <key>teamID</key>
-              <string>6573BLNWHL</string>
+              <string>$CM_APPLE_DEV_TEAM_ID</string>
           </dict>
           </plist>
           EOF) \
             -exportPath ../build/ipa
-
-      - name: Upload to App Store Connect
-        script: |
-          xcrun altool \
-            --upload-app \
-            --file ios/build/ipa/App.ipa \
-            --type ios \
-            --apiKey "$CM_APPLE_API_KEY_ID" \
-            --apiIssuer "$CM_APPLE_API_KEY_ISSUER_ID"
 
     artifacts:
       - ios/build/App.xcarchive
       - ios/build/ipa/App.ipa
 
     publishing:
+      app_store_connect:
+        api_key:
+          key_id: $CM_APPLE_API_KEY_ID
+          issuer_id: $CM_APPLE_API_KEY_ISSUER_ID
+          key_path: $CM_APPLE_API_KEY_PATH
+        submit_to_testflight: true
       email:
         recipients:
           - danielpintal@gmail.com
