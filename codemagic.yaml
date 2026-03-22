@@ -1,21 +1,113 @@
-# Codemagic.yaml
+workflows:
+  ios-workflow:
+    name: iOS Build & Upload to App Store
+    instance_type: mac_mini_m1
+    max_build_duration: 120
+    environment:
+      node: "22"
+      xcode: latest
+      cocoapods: default
+      groups:
+        - app-store-credentials3
+      vars:
+        CM_APPLE_DEV_TEAM_ID: "6573BLNWHL"
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.zoomubik.app
+    scripts:
+      - name: Install dependencies
+        script: npm ci
 
-# Original content of the file remains unchanged...
+      - name: Build web
+        script: npm run build
 
-# Fix Info.plist step
-- name: Fix Info.plist
-  script: |-
-    cd ios/App
-    /usr/libexec/PlistBuddy -c "Set :CFBundleShortVersionString 1.0.1" App/Info.plist
-    # Set the current version
-    /usr/libexec/PlistBuddy -c "Set :MARKETING_VERSION 1.0.1" ios/App/App.xcodeproj/project.pbxproj
-    /usr/libexec/PlistBuddy -c "Set :CURRENT_PROJECT_VERSION 100" ios/App/App.xcodeproj/project.pbxproj
+      - name: Sync Capacitor
+        script: npx cap sync ios
 
-# Set iOS version/build step
-- name: Set iOS version/build
-  script: |-
-    cd ios/App
-    /usr/libexec/PlistBuddy -c "Set :MARKETING_VERSION 1.0.1" App.xcodeproj/project.pbxproj
-    /usr/libexec/PlistBuddy -c "Set :CURRENT_PROJECT_VERSION 100" App.xcodeproj/project.pbxproj
+      - name: Set up code signing
+        script: |
+          keychain initialize
+          app-store-connect fetch-signing-files \
+            com.zoomubik.app \
+            --type IOS_APP_STORE \
+            --create
+          keychain add-certificates
+          xcode-project use-profiles
 
-# Remaining steps...
+      - name: Fix Info.plist
+        script: |
+          cd ios/App
+          plutil -convert xml1 App/Info.plist
+          plutil -lint App/Info.plist
+
+      - name: Build iOS Archive
+        script: |
+          cd ios/App
+          mkdir -p build
+          xcodebuild \
+            -project App.xcodeproj \
+            -scheme App \
+            -configuration Release \
+            -destination 'generic/platform=iOS' \
+            -sdk iphoneos \
+            -archivePath build/App.xcarchive \
+            archive
+
+      - name: Export IPA
+        script: |
+          cd ios/App
+
+          echo "=== Provisioning profiles encontrados ==="
+          ls ~/Library/MobileDevice/Provisioning\ Profiles/ 2>/dev/null || echo "Carpeta vacía"
+
+          PROFILE_PATH=$(ls ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision 2>/dev/null | head -1)
+          echo "Profile path: $PROFILE_PATH"
+
+          if [ -n "$PROFILE_PATH" ]; then
+            PROFILE_UUID=$(security cms -D -i "$PROFILE_PATH" | grep -A1 '<key>UUID</key>' | grep '<string>' | sed 's/.*<string>\(.*\)<\/string>.*/\1/')
+            echo "Profile UUID: $PROFILE_UUID"
+          else
+            echo "ERROR: No se encontró ningún perfil"
+            exit 1
+          fi
+
+          cat > build/ExportOptions.plist <<EOF
+          <?xml version="1.0" encoding="UTF-8"?>
+          <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+          <plist version="1.0">
+          <dict>
+            <key>method</key>
+            <string>app-store-connect</string>
+            <key>signingStyle</key>
+            <string>manual</string>
+            <key>teamID</key>
+            <string>$CM_APPLE_DEV_TEAM_ID</string>
+            <key>provisioningProfiles</key>
+            <dict>
+              <key>com.zoomubik.app</key>
+              <string>$PROFILE_UUID</string>
+            </dict>
+            <key>uploadBitcode</key>
+            <false/>
+            <key>uploadSymbols</key>
+            <true/>
+          </dict>
+          </plist>
+          EOF
+
+          xcodebuild \
+            -exportArchive \
+            -archivePath build/App.xcarchive \
+            -exportOptionsPlist build/ExportOptions.plist \
+            -exportPath build/ipa
+
+    artifacts:
+      - ios/App/build/App.xcarchive
+      - ios/App/build/ipa/*.ipa
+
+    publishing:
+      app_store_connect:
+        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
+        key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
+        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+        submit_to_testflight: true
