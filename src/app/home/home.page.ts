@@ -1,4 +1,4 @@
-﻿import { Component } from '@angular/core';
+﻿import { Component, inject } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { IonHeader, IonToolbar, IonTitle, IonContent, IonButton, IonCard, IonCardContent, IonSpinner, IonCardHeader, IonCardTitle, IonItem, IonLabel, IonIcon, IonChip } from '@ionic/angular/standalone';
 import { addIcons } from 'ionicons';
@@ -18,7 +18,7 @@ export class HomePage {
   selectedPhoto: string | null = null;
   loading = false;
 
-  constructor(private nativeService: NativeService) {}
+  private nativeService = inject(NativeService);
 
   async shareAnnouncement() {
     this.loading = true;

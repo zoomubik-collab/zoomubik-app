@@ -1,4 +1,4 @@
-﻿import { Injectable } from '@angular/core';
+﻿import { Injectable, inject } from '@angular/core';
 import { Share } from '@capacitor/share';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { LocalNotifications } from '@capacitor/local-notifications';
@@ -8,7 +8,9 @@ import { Platform } from '@ionic/angular';
   providedIn: 'root'
 })
 export class NativeService {
-  constructor(private platform: Platform) {
+  private platform = inject(Platform);
+
+  constructor() {
     this.initializeNotifications();
   }
 

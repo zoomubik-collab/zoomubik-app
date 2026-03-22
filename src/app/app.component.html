@@ -1,3 +1,10 @@
 <ion-app>
-  <ion-router-outlet></ion-router-outlet>
+  <div class="webview-container">
+    <iframe
+      [src]="webViewUrl"
+      class="webview-iframe"
+      allow="camera"
+      allowfullscreen
+    ></iframe>
+  </div>
 </ion-app>
