@@ -1,4 +1,4 @@
-import { Injectable, inject } from '@angular/core';
+import { Injectable } from '@angular/core';
 import { Share } from '@capacitor/share';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { LocalNotifications } from '@capacitor/local-notifications';
@@ -9,11 +9,12 @@ import { Platform } from '@ionic/angular';
   providedIn: 'root'
 })
 export class NativeService {
-  private platform = inject(Platform);
-
-  constructor() {
-    this.initializeNotifications();
-    this.initializePushNotifications();
+  constructor(private platform: Platform) {
+    this.platform.ready().then(() => {
+      console.log('PLATFORM READY - pido permisos notificaciones');
+      this.initializeNotifications();
+      this.initializePushNotifications();
+    });
   }
 
   async shareContent(title: string, text: string, url?: string) {
@@ -60,26 +61,35 @@ export class NativeService {
   }
 
   private async initializeNotifications() {
+    console.log('initializeNotifications ejecutado');
+    console.log('Platform platforms:', this.platform.platforms());
     if (this.platform.is('ios') || this.platform.is('android')) {
+      console.log('Estamos en iOS o Android, pido permisos de LocalNotifications');
       try {
         const permission = await LocalNotifications.requestPermissions();
+        console.log('Resultado permiso:', permission);
         if (permission.display === 'granted') {
           console.log('Permisos de notificaciones otorgados');
+        } else {
+          console.log('Permisos de notificaciones NO otorgados:', permission);
         }
       } catch (error) {
         console.error('Error solicitando permisos de notificaciones:', error);
       }
+    } else {
+      console.log('No es iOS ni Android (no pido permisos)');
     }
   }
 
-  // --- Push notifications reales (FCM/APNs) ---
   private async initializePushNotifications() {
+    console.log('initializePushNotifications ejecutado');
     if (this.platform.is('ios') || this.platform.is('android')) {
-      // Import dinámico solo en móvil
-      const { PushNotifications } = await import('@capacitor/push-notifications');
       try {
+        const { PushNotifications } = await import('@capacitor/push-notifications');
+        console.log('PushNotifications importado');
         // Solicitar permisos push
         const permStatus = await PushNotifications.requestPermissions();
+        console.log('Permisos Push:', permStatus);
         if (permStatus.receive !== 'granted') {
           console.warn('Permiso de push denegado');
           return;
@@ -124,6 +134,8 @@ export class NativeService {
       } catch (err) {
         console.error('Error inicializando PushNotifications:', err);
       }
+    } else {
+      console.log('No es iOS ni Android (no pido permisos push)');
     }
   }
 
