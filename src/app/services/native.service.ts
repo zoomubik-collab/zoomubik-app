@@ -10,6 +10,8 @@ import { Platform } from '@ionic/angular';
 })
 export class NativeService {
   constructor(private platform: Platform) {
+    // ⚡️ ALERTA VISUAL DE DEBUGGING
+    alert('NativeService inicializado (constructor ejecutado)');
     this.platform.ready().then(() => {
       console.log('PLATFORM READY - pido permisos notificaciones');
       this.initializeNotifications();
