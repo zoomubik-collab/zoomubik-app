@@ -1,4 +1,4 @@
-import { Component, OnInit, inject } from '@angular/core';
+import { Component, OnInit } from '@angular/core';
 import { IonApp } from '@ionic/angular/standalone';
 import { Platform } from '@ionic/angular';
 import { NativeService } from './services/native.service';
@@ -10,10 +10,10 @@ import { NativeService } from './services/native.service';
   imports: [IonApp],
 })
 export class AppComponent implements OnInit {
-  private platform = inject(Platform);
-
-  // Se inyecta para inicializar features nativas (luego aquí pondremos Push remotas)
-  private nativeService = inject(NativeService);
+  constructor(
+    private platform: Platform,
+    private nativeService: NativeService  // <--- ¡Aquí está la inyección explícita!
+  ) {}
 
   async ngOnInit(): Promise<void> {
     await this.platform.ready();
