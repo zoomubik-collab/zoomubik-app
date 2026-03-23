@@ -2,7 +2,7 @@ import { Injectable, inject } from '@angular/core';
 import { Share } from '@capacitor/share';
 import { Camera, CameraResultType, CameraSource } from '@capacitor/camera';
 import { LocalNotifications } from '@capacitor/local-notifications';
-import { PushNotifications } from '@capacitor/push-notifications';
+// Quitamos el import directo de PushNotifications
 import { Platform } from '@ionic/angular';
 
 @Injectable({
@@ -75,6 +75,8 @@ export class NativeService {
   // --- Push notifications reales (FCM/APNs) ---
   private async initializePushNotifications() {
     if (this.platform.is('ios') || this.platform.is('android')) {
+      // Import dinámico solo en móvil
+      const { PushNotifications } = await import('@capacitor/push-notifications');
       try {
         // Solicitar permisos push
         const permStatus = await PushNotifications.requestPermissions();
@@ -87,7 +89,7 @@ export class NativeService {
         await PushNotifications.register();
 
         // Escuchar evento de registro para obtener token
-        PushNotifications.addListener('registration', async (token) => {
+        PushNotifications.addListener('registration', async (token: { value: string }) => {
           console.log('Push registration token:', token.value);
 
           // Enviar token al backend (WordPress)
@@ -109,12 +111,12 @@ export class NativeService {
         });
 
         // Escuchar errores en el registro
-        PushNotifications.addListener('registrationError', (error) => {
+        PushNotifications.addListener('registrationError', (error: any) => {
           console.error('Error en registro de push:', error);
         });
 
         // Opcional: gestionar recepción de notificaciones mientras la app está abierta
-        PushNotifications.addListener('pushNotificationReceived', (notification) => {
+        PushNotifications.addListener('pushNotificationReceived', (notification: any) => {
           console.log('Push recibido: ', notification);
           // Aquí puedes mostrar una LocalNotification, toast, etc.
         });
@@ -142,13 +144,4 @@ export class NativeService {
     } catch (error) {
       console.error('Error enviando notificación:', error);
     }
-  }
-
-  async cancelAllNotifications() {
-    try {
-      await LocalNotifications.cancel({ notifications: [] });
-    } catch (error) {
-      console.error('Error cancelando notificaciones:', error);
-    }
-  }
-}
+ *](#)
