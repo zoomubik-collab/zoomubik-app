@@ -18,8 +18,8 @@ workflows:
       - name: Install dependencies
         script: npm ci
 
-      - name: Build web
-        script: npm run build
+      # - name: Build web
+      #   script: npm run build
 
       - name: Sync Capacitor
         script: npx cap sync ios
