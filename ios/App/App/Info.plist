@@ -21,7 +21,7 @@
 	<key>CFBundleShortVersionString</key>
 	<string>1.0.2</string> <!-- Versión pública -->
 	<key>CFBundleVersion</key>
-	<string>104</string>   <!-- Build interno, solo números enteros y siempre mayor en cada envío a App Store/TestFlight -->
+	<string>105</string>   <!-- Build interno, solo números enteros y siempre mayor en cada envío a App Store/TestFlight -->
 	<key>LSRequiresIPhoneOS</key>
 	<true/>
 	<key>NSCameraUsageDescription</key>
