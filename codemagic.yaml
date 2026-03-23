@@ -11,6 +11,9 @@ workflows:
         - app-store-credentials3
       vars:
         CM_APPLE_DEV_TEAM_ID: "6573BLNWHL"
+      ios_signing:
+        distribution_type: app_store
+        bundle_identifier: com.zoomubik.app
 
     scripts:
       - name: Restore GoogleService-Info.plist
@@ -30,12 +33,10 @@ workflows:
           pod install
           cd ..
 
+      # ✅ SIN keychain ni fetch manual (esto arregla tu error)
       - name: Set up code signing
         script: |
-          keychain initialize
-          app-store-connect fetch-signing-files com.zoomubik.app --type IOS_APP_STORE --create
-          keychain add-certificates
-          xcode-project use-profiles
+          echo "Using automatic code signing by Codemagic"
 
       - name: Build iOS Archive (Flutter)
         script: |
@@ -50,39 +51,20 @@ workflows:
             archive
           cd ..
 
+      # ✅ Export simple (Codemagic ya tiene profiles automáticos)
       - name: Export IPA
         script: |
           cd ios
 
-          PROFILE_PATH=$(ls ~/Library/MobileDevice/Provisioning\ Profiles/*.mobileprovision 2>/dev/null | head -1)
-          if [ -z "$PROFILE_PATH" ]; then
-            echo "ERROR: No se encontró ningún perfil"
-            exit 1
-          fi
-
-          PROFILE_UUID=$(security cms -D -i "$PROFILE_PATH" | grep -A1 '<key>UUID</key>' | grep '<string>' | sed 's/.*<string>\(.*\)<\/string>.*/\1/')
-          echo "Profile UUID: $PROFILE_UUID"
-
-          cat > build/ExportOptions.plist <<EOF
+          cat > ExportOptions.plist <<EOF
           <?xml version="1.0" encoding="UTF-8"?>
           <!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
           <plist version="1.0">
           <dict>
             <key>method</key>
             <string>app-store-connect</string>
-            <key>signingStyle</key>
-            <string>manual</string>
             <key>teamID</key>
             <string>$CM_APPLE_DEV_TEAM_ID</string>
-            <key>provisioningProfiles</key>
-            <dict>
-              <key>com.zoomubik.app</key>
-              <string>$PROFILE_UUID</string>
-            </dict>
-            <key>uploadBitcode</key>
-            <false/>
-            <key>uploadSymbols</key>
-            <true/>
           </dict>
           </plist>
           EOF
@@ -90,7 +72,7 @@ workflows:
           xcodebuild \
             -exportArchive \
             -archivePath build/Runner.xcarchive \
-            -exportOptionsPlist build/ExportOptions.plist \
+            -exportOptionsPlist ExportOptions.plist \
             -exportPath build/ipa
 
     artifacts:
