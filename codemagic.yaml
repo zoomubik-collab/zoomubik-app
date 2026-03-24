@@ -25,7 +25,7 @@ workflows:
           flutter pub get
       - name: Pod Install
         script: |
-          cd ios && pod install
+          cd $CM_BUILD_DIR/ios && pod install --repo-update
       - name: Build IPA
         script: |
           flutter build ipa --release \
@@ -34,7 +34,7 @@ workflows:
       - build/ios/ipa/*.ipa
     publishing:
       app_store_connect:
-        api_key: $APP_STORE_CONNECT_PkRIVATE_KEY
-        kkkkey_id: $APP_STORE_CONNECT_KkEY_IDENTIFIER
- kkkkkkkk       issuer_id: $APP_STORE_CONNEk
-k
+        api_key: $APP_STORE_CONNECT_PRIVATE_KEY
+        key_id: $APP_STORE_CONNECT_KEY_IDENTIFIER
+        issuer_id: $APP_STORE_CONNECT_ISSUER_ID
+        submit_to_testflight: true
