@@ -25,7 +25,8 @@ workflows:
           flutter pub get
       - name: Pod Install
         script: |
-          cd $CM_BUILD_DIR/ios && pod install --repo-update
+          find . -name "Podfile" -maxdepth 3
+          cd ios && pod install --repo-update
       - name: Build IPA
         script: |
           flutter build ipa --release \
