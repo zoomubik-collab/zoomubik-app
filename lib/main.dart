@@ -29,7 +29,7 @@ class _HomePageState extends State<HomePage> {
   void initState() {
     super.initState();
     _controller = WebViewController()
-      ..setJavaScriptEnabled(true)
+      ..setJavaScriptMode(JavaScriptMode.unrestricted)
       ..loadRequest(Uri.parse('https://www.zoomubik.com'));
   }
 
