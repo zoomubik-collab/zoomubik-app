@@ -2,6 +2,7 @@ import 'package:flutter/material.dart';
 import 'package:webview_flutter/webview_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
+import 'package:http/http.dart' as http;
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -25,9 +26,7 @@ class ZoomubikApp extends StatelessWidget {
     return MaterialApp(
       title: 'Zoomubik',
       debugShowCheckedModeBanner: false,
-      theme: ThemeData(
-        primarySwatch: Colors.indigo,
-      ),
+      theme: ThemeData(primarySwatch: Colors.indigo),
       home: HomePage(),
     );
   }
@@ -47,7 +46,25 @@ class _HomePageState extends State<HomePage> {
     _initFirebaseMessaging();
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..setNavigationDelegate(NavigationDelegate(
+        onPageFinished: (url) {
+          _injectUserId();
+        },
+      ))
       ..loadRequest(Uri.parse('https://www.zoomubik.com'));
+  }
+
+  Future<void> _injectUserId() async {
+    // Obtener el user_id de WordPress via JavaScript
+    final result = await _controller.runJavaScriptReturningResult(
+      'typeof zoomubik_user_id !== "undefined" ? zoomubik_user_id.toString() : "0"'
+    );
+    final userId = result.toString().replaceAll('"', '');
+    print('WordPress user_id: $userId');
+
+    if (userId != '0' && userId.isNotEmpty) {
+      await _saveFcmToken(userId);
+    }
   }
 
   Future<void> _initFirebaseMessaging() async {
@@ -57,10 +74,42 @@ class _HomePageState extends State<HomePage> {
         badge: true,
         sound: true,
       );
+
       String? token = await FirebaseMessaging.instance.getToken();
       print('FCM Token: $token');
+
+      // Escuchar renovaciones del token
+      FirebaseMessaging.instance.onTokenRefresh.listen((newToken) async {
+        print('FCM Token renovado: $newToken');
+        final result = await _controller.runJavaScriptReturningResult(
+          'typeof zoomubik_user_id !== "undefined" ? zoomubik_user_id.toString() : "0"'
+        );
+        final userId = result.toString().replaceAll('"', '');
+        if (userId != '0') await _saveFcmToken(userId);
+      });
+
     } catch (e) {
       print('Error en Firebase Messaging: $e');
+    }
+  }
+
+  Future<void> _saveFcmToken(String userId) async {
+    try {
+      String? token = await FirebaseMessaging.instance.getToken();
+      if (token == null) return;
+
+      final response = await http.post(
+        Uri.parse('https://www.zoomubik.com/wp-admin/admin-ajax.php'),
+        body: {
+          'action': 'zmoriginal_save_fcm_token',
+          'user_id': userId,
+          'token': token,
+        },
+      );
+
+      print('Token guardado en WordPress: ${response.statusCode}');
+    } catch (e) {
+      print('Error guardando token: $e');
     }
   }
 
