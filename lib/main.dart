@@ -54,15 +54,24 @@ class _HomePageState extends State<HomePage> {
   }
 
   Future<void> _initializeApp() async {
-    // Cargar user_id guardado
+    // Cargar user_id y token de sesión guardados
     _currentUserId = await _secureStorage.read(key: 'wp_user_id');
+    final sessionToken = await _secureStorage.read(key: 'wp_session_token');
+    
     print('📱 User ID cargado: $_currentUserId');
+    print('🔐 Session token cargado: ${sessionToken != null ? 'Sí' : 'No'}');
 
     // Inicializar WebView primero
     _initWebView();
 
     // Inicializar Firebase Messaging
     await _initFirebaseMessaging();
+
+    // Si hay sesión guardada, inyectarla
+    if (sessionToken != null && _currentUserId != null) {
+      await Future.delayed(Duration(seconds: 2));
+      await _restoreSession(sessionToken);
+    }
 
     // Marcar como inicializado
     if (mounted) {
@@ -94,15 +103,22 @@ class _HomePageState extends State<HomePage> {
           
           // Inyectar script para mantener sesión
           await _controller.runJavaScript('''
-            // Guardar cookies en localStorage
+            // Guardar todas las cookies en localStorage
             if (document.cookie) {
-              localStorage.setItem('wp_cookies', document.cookie);
+              localStorage.setItem('wp_all_cookies', document.cookie);
+              console.log("Cookies guardadas: " + document.cookie);
             }
             
             // Restaurar cookies si existen
-            var savedCookies = localStorage.getItem('wp_cookies');
-            if (savedCookies && !document.cookie.includes('wordpress_logged_in')) {
-              document.cookie = savedCookies;
+            var savedCookies = localStorage.getItem('wp_all_cookies');
+            if (savedCookies) {
+              var cookies = savedCookies.split("; ");
+              cookies.forEach(function(cookie) {
+                if (cookie && !document.cookie.includes(cookie.split("=")[0])) {
+                  document.cookie = cookie + "; path=/; secure; samesite=lax";
+                }
+              });
+              console.log("Cookies restauradas");
             }
           ''');
           
@@ -118,8 +134,39 @@ class _HomePageState extends State<HomePage> {
     // Guardar en almacenamiento seguro
     await _secureStorage.write(key: 'wp_user_id', value: userId);
     print('✅ User ID guardado: $userId');
+    
+    // Guardar token de sesión
+    try {
+      final sessionToken = await _controller.runJavaScriptReturningResult(
+        'document.cookie.split("; ").find(row => row.startsWith("wordpress_logged_in"))?.split("=")[1] || ""'
+      );
+      if (sessionToken != null && sessionToken.toString().isNotEmpty) {
+        await _secureStorage.write(key: 'wp_session_token', value: sessionToken.toString());
+        print('🔐 Token de sesión guardado');
+      }
+    } catch (e) {
+      print('⚠️ Error guardando token de sesión: $e');
+    }
+    
     // Guardar token FCM con el nuevo user_id
     await _saveFcmToken(userId);
+  }
+
+  Future<void> _restoreSession(String sessionToken) async {
+    try {
+      print('🔄 Restaurando sesión...');
+      await _controller.runJavaScript('''
+        // Restaurar cookie de sesión
+        document.cookie = "wordpress_logged_in=$sessionToken; path=/; secure; samesite=lax";
+        console.log("Sesión restaurada");
+      ''');
+      
+      // Esperar a que se restaure y luego inyectar user_id
+      await Future.delayed(Duration(seconds: 1));
+      await _injectUserId();
+    } catch (e) {
+      print('❌ Error restaurando sesión: $e');
+    }
   }
 
   Future<void> _injectUserId() async {
