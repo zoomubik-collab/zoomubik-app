@@ -45,6 +45,7 @@ class _HomePageState extends State<HomePage> {
   late final WebViewController _controller;
   final _secureStorage = FlutterSecureStorage();
   String? _currentUserId;
+  bool _isInitialized = false;
 
   @override
   void initState() {
@@ -57,11 +58,18 @@ class _HomePageState extends State<HomePage> {
     _currentUserId = await _secureStorage.read(key: 'wp_user_id');
     print('📱 User ID cargado: $_currentUserId');
 
+    // Inicializar WebView primero
+    _initWebView();
+
     // Inicializar Firebase Messaging
     await _initFirebaseMessaging();
 
-    // Inicializar WebView
-    _initWebView();
+    // Marcar como inicializado
+    if (mounted) {
+      setState(() {
+        _isInitialized = true;
+      });
+    }
   }
 
   void _initWebView() {
@@ -219,6 +227,21 @@ class _HomePageState extends State<HomePage> {
 
   @override
   Widget build(BuildContext context) {
+    if (!_isInitialized) {
+      return Scaffold(
+        body: Center(
+          child: Column(
+            mainAxisAlignment: MainAxisAlignment.center,
+            children: [
+              CircularProgressIndicator(),
+              SizedBox(height: 20),
+              Text('Cargando Zoomubik...'),
+            ],
+          ),
+        ),
+      );
+    }
+
     return Scaffold(
       body: SafeArea(
         child: WebViewWidget(controller: _controller),
