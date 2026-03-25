@@ -3,6 +3,7 @@ import 'package:webview_flutter/webview_flutter.dart';
 import 'package:firebase_core/firebase_core.dart';
 import 'package:firebase_messaging/firebase_messaging.dart';
 import 'package:http/http.dart' as http;
+import 'dart:convert';
 
 @pragma('vm:entry-point')
 Future<void> _firebaseMessagingBackgroundHandler(RemoteMessage message) async {
@@ -70,19 +71,26 @@ class _HomePageState extends State<HomePage> {
     await Future.delayed(Duration(seconds: 3));
 
     try {
-      final result = await _controller.runJavaScriptReturningResult(
-        'typeof zoomubik_user_id !== "undefined" ? zoomubik_user_id.toString() : "0"'
+      // Obtener user_id directamente desde WordPress via AJAX
+      final response = await http.post(
+        Uri.parse('https://www.zoomubik.com/wp-admin/admin-ajax.php'),
+        body: {'action': 'zm_get_user_id'},
       );
-      final userId = result.toString().replaceAll('"', '');
-      print('WordPress user_id: $userId');
+
+      print('Respuesta user_id: ${response.body}');
+
+      final decoded = json.decode(response.body);
+      final userId = decoded['data']['user_id'].toString();
+
+      print('User ID obtenido: $userId');
 
       if (userId != '0' && userId.isNotEmpty) {
         await _saveFcmToken(userId);
       } else {
-        print('Usuario no logueado o variable no disponible');
+        print('Usuario no logueado');
       }
     } catch (e) {
-      print('Error inyectando user_id: $e');
+      print('Error obteniendo user_id: $e');
     }
   }
 
@@ -100,10 +108,12 @@ class _HomePageState extends State<HomePage> {
       FirebaseMessaging.instance.onTokenRefresh.listen((newToken) async {
         print('FCM Token renovado: $newToken');
         try {
-          final result = await _controller.runJavaScriptReturningResult(
-            'typeof zoomubik_user_id !== "undefined" ? zoomubik_user_id.toString() : "0"'
+          final response = await http.post(
+            Uri.parse('https://www.zoomubik.com/wp-admin/admin-ajax.php'),
+            body: {'action': 'zm_get_user_id'},
           );
-          final userId = result.toString().replaceAll('"', '');
+          final decoded = json.decode(response.body);
+          final userId = decoded['data']['user_id'].toString();
           if (userId != '0') await _saveFcmToken(userId);
         } catch (e) {
           print('Error en onTokenRefresh: $e');
