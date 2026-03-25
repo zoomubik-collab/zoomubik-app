@@ -47,15 +47,6 @@ class _HomePageState extends State<HomePage> {
     _initFirebaseMessaging();
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
-      ..setGeolocationPermissionsPromptCallbacks(
-        onShowPrompt: (request) async {
-          return GeolocationPermissionsResponse(
-            allow: true,
-            retain: true,
-          );
-        },
-        onHidePrompt: () {},
-      )
       ..addJavaScriptChannel(
         'FlutterChannel',
         onMessageReceived: (JavaScriptMessage message) {
@@ -78,20 +69,15 @@ class _HomePageState extends State<HomePage> {
 
   Future<void> _injectUserId() async {
     await Future.delayed(Duration(seconds: 3));
-
     try {
       final response = await http.post(
         Uri.parse('https://www.zoomubik.com/wp-admin/admin-ajax.php'),
         body: {'action': 'zm_get_user_id'},
       );
-
       print('Respuesta user_id: ${response.body}');
-
       final decoded = json.decode(response.body);
       final userId = decoded['data']['user_id'].toString();
-
       print('User ID obtenido: $userId');
-
       if (userId != '0' && userId.isNotEmpty) {
         await _saveFcmToken(userId);
       } else {
@@ -109,10 +95,8 @@ class _HomePageState extends State<HomePage> {
         badge: true,
         sound: true,
       );
-
       String? token = await FirebaseMessaging.instance.getToken();
       print('FCM Token: $token');
-
       FirebaseMessaging.instance.onTokenRefresh.listen((newToken) async {
         print('FCM Token renovado: $newToken');
         try {
@@ -136,7 +120,6 @@ class _HomePageState extends State<HomePage> {
     try {
       String? token = await FirebaseMessaging.instance.getToken();
       if (token == null) return;
-
       final response = await http.post(
         Uri.parse('https://www.zoomubik.com/wp-admin/admin-ajax.php'),
         body: {
@@ -145,7 +128,6 @@ class _HomePageState extends State<HomePage> {
           'token': token,
         },
       );
-
       print('Token guardado en WordPress: ${response.statusCode}');
       print('Respuesta: ${response.body}');
     } catch (e) {
