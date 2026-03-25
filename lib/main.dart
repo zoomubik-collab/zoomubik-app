@@ -46,6 +46,18 @@ class _HomePageState extends State<HomePage> {
     _initFirebaseMessaging();
     _controller = WebViewController()
       ..setJavaScriptMode(JavaScriptMode.unrestricted)
+      ..addJavaScriptChannel(
+        'FlutterChannel',
+        onMessageReceived: (JavaScriptMessage message) {
+          print('Mensaje desde web: ${message.message}');
+          if (message.message.startsWith('user_id:')) {
+            final userId = message.message.replaceFirst('user_id:', '');
+            if (userId != '0' && userId.isNotEmpty) {
+              _saveFcmToken(userId);
+            }
+          }
+        },
+      )
       ..setNavigationDelegate(NavigationDelegate(
         onPageFinished: (url) {
           _injectUserId();
