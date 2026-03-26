@@ -1,4 +1,4 @@
-import 'package:flutter/material.dart';
+﻿import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
 import 'package:firebase_core/firebase_core.dart';
@@ -7,9 +7,13 @@ import 'firebase_options.dart';
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  await Firebase.initializeApp(
-    options: DefaultFirebaseOptions.currentPlatform,
-  );
+  try {
+    await Firebase.initializeApp(
+      options: DefaultFirebaseOptions.currentPlatform,
+    );
+  } catch (e) {
+    debugPrint('Error Firebase: \');
+  }
 
   if (!kDebugMode) {
     await InAppWebViewController.setWebContentsDebuggingEnabled(false);
@@ -52,9 +56,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     useHybridComposition: true,
     allowsInlineMediaPlayback: true,
     userAgent:
-        'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) '
-        'AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 '
-        'Mobile/15E148 Safari/604.1',
+        'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 Mobile/15E148 Safari/604.1',
   );
 
   @override
@@ -83,7 +85,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     final isLoggedIn = cookies.any(
       (c) => c.name.startsWith('wordpress_logged_in'),
     );
-    debugPrint(isLoggedIn ? '✅ Sesión activa' : '⚠️ Sin sesión');
+    debugPrint(isLoggedIn ? 'Sesion activa' : 'Sin sesion');
   }
 
   @override
@@ -97,22 +99,21 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           initialSettings: _settings,
           onWebViewCreated: (controller) {
             _webViewController = controller;
-            debugPrint('🌐 WebView creado');
+            debugPrint('WebView creado');
           },
           onLoadStart: (controller, url) {
-            debugPrint('⏳ Cargando: $url');
+            debugPrint('Cargando: \');
           },
           onLoadStop: (controller, url) async {
-            debugPrint('✅ Página cargada: $url');
+            debugPrint('Pagina cargada: \');
             await _checkSessionAlive();
           },
           onReceivedError: (controller, request, error) {
-            debugPrint('❌ Error: ${error.description}');
+            debugPrint('Error: \');
           },
           shouldOverrideUrlLoading: (controller, navigationAction) async {
             final url = navigationAction.request.url?.toString() ?? '';
             if (!url.startsWith('https://www.zoomubik.com')) {
-              debugPrint('🔗 URL externa bloqueada: $url');
               return NavigationActionPolicy.CANCEL;
             }
             return NavigationActionPolicy.ALLOW;
