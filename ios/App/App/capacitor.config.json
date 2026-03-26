@@ -1,0 +1,14 @@
+{
+	"appId": "com.zoomubik.app",
+	"appName": "Zoomubik",
+	"webDir": "www",
+	"packageClassList": [
+		"AppPlugin",
+		"CAPCameraPlugin",
+		"HapticsPlugin",
+		"KeyboardPlugin",
+		"LocalNotificationsPlugin",
+		"SharePlugin",
+		"StatusBarPlugin"
+	]
+}
