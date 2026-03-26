@@ -28,6 +28,8 @@
 	<string>LaunchScreen</string>
 	<key>UIMainStoryboardFile</key>
 	<string>Main</string>
+
+	<!-- Orientaciones -->
 	<key>UISupportedInterfaceOrientations</key>
 	<array>
 		<string>UIInterfaceOrientationPortrait</string>
@@ -41,19 +43,29 @@
 		<string>UIInterfaceOrientationLandscapeLeft</string>
 		<string>UIInterfaceOrientationLandscapeRight</string>
 	</array>
+
+	<!-- Rendimiento -->
 	<key>CADisableMinimumFrameDurationOnPhone</key>
 	<true/>
 	<key>UIApplicationSupportsIndirectInputEvents</key>
 	<true/>
+
+	<!-- ✅ Background modes: ya los tienes, correcto -->
 	<key>UIBackgroundModes</key>
 	<array>
 		<string>fetch</string>
 		<string>remote-notification</string>
 	</array>
+
+	<!-- Localización -->
 	<key>NSLocationWhenInUseUsageDescription</key>
 	<string>Zoomubik necesita tu ubicación para mostrar anuncios cercanos a ti.</string>
 	<key>NSLocationAlwaysUsageDescription</key>
 	<string>Zoomubik necesita tu ubicación para mostrar anuncios cercanos a ti.</string>
+	<key>NSLocationAlwaysAndWhenInUseUsageDescription</key>
+	<string>Zoomubik necesita tu ubicación para mostrar anuncios cercanos a ti.</string>
+
+	<!-- Red local -->
 	<key>NSBonjourServices</key>
 	<array>
 		<string>_http._tcp</string>
@@ -61,5 +73,12 @@
 	</array>
 	<key>NSLocalNetworkUsageDescription</key>
 	<string>Zoomubik necesita acceso a la red local.</string>
-</dict>
-</plist>
+
+	<!-- ✅ NUEVO: Cámara (flutter_inappwebview puede pedirla desde la web) -->
+	<key>NSCameraUsageDescription</key>
+	<string>Zoomubik necesita la cámara para subir fotos a los anuncios.</string>
+
+	<!-- ✅ NUEVO: Fotos (para subir imágenes desde la galería) -->
+	<key>NSPhotoLibraryUsageDescription</key>
+	<string>Zoomubik necesita acceso a tus fotos para subirlas a los anuncios.</string>
+	<k
