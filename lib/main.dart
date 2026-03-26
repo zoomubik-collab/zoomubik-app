@@ -1,11 +1,16 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/foundation.dart';
 import 'package:flutter_inappwebview/flutter_inappwebview.dart';
+import 'package:firebase_core/firebase_core.dart';
+import 'firebase_options.dart';
 
 Future<void> main() async {
   WidgetsFlutterBinding.ensureInitialized();
 
-  // iOS: desactiva debug en producción
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
   if (!kDebugMode) {
     await InAppWebViewController.setWebContentsDebuggingEnabled(false);
   }
@@ -34,26 +39,18 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   late InAppWebViewController _webViewController;
   final String _homeUrl = 'https://www.zoomubik.com';
 
-  // ✅ Ajustes clave para sesión persistente en iOS
   final InAppWebViewSettings _settings = InAppWebViewSettings(
-    // --- Sesión persistente iOS ---
-    sharedCookiesEnabled: true,          // ← comparte cookies con el sistema iOS
-    incognito: false,                     // ← nunca modo incógnito
-    thirdPartyCookiesEnabled: true,       // ← WordPress necesita esto
-
-    // --- Almacenamiento web ---
+    sharedCookiesEnabled: true,
+    incognito: false,
+    thirdPartyCookiesEnabled: true,
     databaseEnabled: true,
     domStorageEnabled: true,
     cacheEnabled: true,
     cacheMode: CacheMode.LOAD_CACHE_ELSE_NETWORK,
-
-    // --- Comportamiento general ---
     useShouldOverrideUrlLoading: true,
     mediaPlaybackRequiresUserGesture: false,
-    useHybridComposition: true,           // ← mejor rendimiento en Android
+    useHybridComposition: true,
     allowsInlineMediaPlayback: true,
-
-    // ← User-agent de Safari real: WordPress/UltimateMember lo requiere
     userAgent:
         'Mozilla/5.0 (iPhone; CPU iPhone OS 17_0 like Mac OS X) '
         'AppleWebKit/605.1.15 (KHTML, like Gecko) Version/17.0 '
@@ -63,7 +60,7 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
   @override
   void initState() {
     super.initState();
-    WidgetsBinding.instance.addObserver(this); // observa ciclo de vida
+    WidgetsBinding.instance.addObserver(this);
   }
 
   @override
@@ -72,7 +69,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     super.dispose();
   }
 
-  // ✅ Cuando la app vuelve al primer plano, refresca si hace falta
   @override
   void didChangeAppLifecycleState(AppLifecycleState state) {
     if (state == AppLifecycleState.resumed) {
@@ -80,7 +76,6 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
     }
   }
 
-  // Comprueba si la cookie de WordPress sigue activa
   Future<void> _checkSessionAlive() async {
     final cookies = await CookieManager.instance().getCookies(
       url: WebUri(_homeUrl),
@@ -114,11 +109,9 @@ class _HomePageState extends State<HomePage> with WidgetsBindingObserver {
           onReceivedError: (controller, request, error) {
             debugPrint('❌ Error: ${error.description}');
           },
-          // ✅ Evita que links externos rompan la navegación interna
           shouldOverrideUrlLoading: (controller, navigationAction) async {
             final url = navigationAction.request.url?.toString() ?? '';
             if (!url.startsWith('https://www.zoomubik.com')) {
-              // Aquí podrías abrir con url_launcher si quisieras
               debugPrint('🔗 URL externa bloqueada: $url');
               return NavigationActionPolicy.CANCEL;
             }
