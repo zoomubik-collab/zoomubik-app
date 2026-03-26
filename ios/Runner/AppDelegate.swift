@@ -21,7 +21,12 @@ import WebKit
     if #available(iOS 11.0, *) {
       let dataStore = WKWebsiteDataStore.default()
       // Las cookies se guardan automáticamente en el dataStore por defecto
-      // No necesitamos configurar propiedades adicionales
+      
+      // Configuración específica para flutter_inappwebview
+      let config = WKWebViewConfiguration()
+      config.websiteDataStore = dataStore
+      config.allowsInlineMediaPlayback = true
+      config.mediaTypesRequiringUserActionForPlayback = []
     }
     
     locationManager = CLLocationManager()
