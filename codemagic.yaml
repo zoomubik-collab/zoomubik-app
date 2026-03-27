@@ -17,39 +17,35 @@ workflows:
         distribution_type: app_store
         bundle_identifier: com.zoomubik.app
     scripts:
-      - name: Init submodules
-        script: |
-          cd $CM_BUILD_DIR
-          git submodule update --init zoomubik-flutter || true
       - name: Restore GoogleService-Info.plist
         script: |
-          mkdir -p $CM_BUILD_DIR/zoomubik-flutter/ios/Runner
-          echo $GOOGLE_SERVICE_INFO_PLIST | base64 --decode > $CM_BUILD_DIR/zoomubik-flutter/ios/Runner/GoogleService-Info.plist
+          echo $GOOGLE_SERVICE_INFO_PLIST | base64 --decode > $CM_BUILD_DIR/ios/Runner/GoogleService-Info.plist
       - name: Install Flutter dependencies
         script: |
-          cd $CM_BUILD_DIR/zoomubik-flutter
           flutter clean
           flutter pub get
       - name: Pod Install
         script: |
-          cd $CM_BUILD_DIR/zoomubik-flutter/ios
+          echo "=== Contenido de ios/ ==="
+          ls $CM_BUILD_DIR/ios/
+          echo "=== Buscando Podfile ==="
+          find $CM_BUILD_DIR -name "Podfile" 2>/dev/null
+          cd $CM_BUILD_DIR/ios
           rm -rf Pods Podfile.lock
           pod install --repo-update --verbose
       - name: Set up code signing
         script: |
-          cd $CM_BUILD_DIR/zoomubik-flutter
           xcode-project use-profiles
       - name: Bump build number
         script: |
           LATEST=$(app-store-connect get-latest-testflight-build-number 6760907092)
-          cd $CM_BUILD_DIR/zoomubik-flutter/ios && agvtool new-version -all $(($LATEST + 1))
+          cd ios && agvtool new-version -all $(($LATEST + 1))
       - name: Build Flutter
         script: |
-          cd $CM_BUILD_DIR/zoomubik-flutter
           flutter build ios --release --no-codesign
       - name: Build IPA
         script: |
-          cd $CM_BUILD_DIR/zoomubik-flutter/ios
+          cd ios
           xcodebuild -workspace Runner.xcworkspace \
             -scheme Runner \
             -configuration Release \
@@ -63,10 +59,10 @@ workflows:
             archive
           xcodebuild -exportArchive \
             -archivePath build/Runner.xcarchive \
-            -exportOptionsPlist $CM_BUILD_DIR/ios_export_options.plist \
+            -exportOptionsPlist ../ios_export_options.plist \
             -exportPath build/ipa
     artifacts:
-      - zoomubik-flutter/ios/build/ipa/*.ipa
+      - ios/build/ipa/*.ipa
     publishing:
       app_store_connect:
         api_key: $APP_STORE_CONNECT_PRIVATE_KEY
