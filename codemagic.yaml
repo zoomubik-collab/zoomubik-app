@@ -1,4 +1,4 @@
-﻿workflows:
+workflows:
   ios-workflow:
     name: iOS Build & Upload to App Store (Flutter)
     instance_type: mac_mini_m1
@@ -19,6 +19,7 @@
     scripts:
       - name: Restore GoogleService-Info.plist
         script: |
+          mkdir -p $CM_BUILD_DIR/zoomubik-flutter/ios/Runner
           echo $GOOGLE_SERVICE_INFO_PLIST | base64 --decode > $CM_BUILD_DIR/zoomubik-flutter/ios/Runner/GoogleService-Info.plist
       - name: Install Flutter dependencies
         script: |
